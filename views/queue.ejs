@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <form action="/" method="GET"><input type="submit" class="button" value="Home"></form>
+    Queue: <%=queue.name%> by <%=queue.owner%>
+  </head>
+  <body>
+    <div id="mine">
+      <form action="/approveSongs" method="POST" name="send" id="send">
+        <input type="hidden" name="choose" id="choose" value="<%=id%>" />
+        <table id="main">
+          <tr>
+            <th style="width:100px"></th>
+            <th style="width:100px">Song</th>
+            <th style="width:100px">Artist</th>
+          </tr>
+          <%queue.songs.forEach(s => {%>
+            <tr>
+              <td><input type="checkbox" id="<%=s.song_id%>" name="<%=s.song_id%>" value="<%=s.name%>"></td>
+              <td><%=s.artists[0]%></td>
+              <td><label for="<%=s.song_id%>"><%=s.name%></label></td>
+            </tr>
+          <%});%>
+        </table>
+        <input type="submit" name="approve" value="Approve Selected Songs" class="ghost-button">
+        <input type="submit" name="reject" value="Reject Selected Songs" class="ghost-button">
+      </form>
+    </div>
+  </body>
+</html>

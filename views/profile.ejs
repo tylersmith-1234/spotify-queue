@@ -1,0 +1,351 @@
+<!doctype html>
+<html>
+  <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+  <style type="text/css">
+    #login, #loggedin {
+      display: none;
+    }
+    .text-overflow {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      width: 500px;
+    }
+  /* Style the button that is used to open and close the collapsible content */
+    .collapsible {
+      background-color: #eee;
+      color: #444;
+      cursor: pointer;
+      padding: 18px;
+      width: 100%;
+      border: none;
+      text-align: left;
+      outline: none;
+      font-size: 15px;
+    }
+    
+    /* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
+    .active, .collapsible:hover {
+      background-color: #ccc;
+    }
+    
+    /* Style the collapsible content. Note: hidden by default */
+    .content {
+      padding: 0 18px;
+      display: none;
+      overflow: hidden;
+      background-color: #f1f1f1;
+      transition: max-height 0.2s ease-out;
+    }
+    .collapsible:after {
+      content: '\02795'; /* Unicode character for "plus" sign (+) */
+      font-size: 13px;
+      color: white;
+      float: right;
+      margin-left: 5px;
+    }
+
+    .active:after {
+      content: "\2796"; /* Unicode character for "minus" sign (-) */
+    }
+  </style>
+  <head>
+    <form action="/" method="GET"><input type="submit" class="button" value="Home"></form>
+    <title>Log into Spotify</title>
+  </head>
+  <%if (!access_token) {%>
+
+
+    <body>
+      <div class="container">
+        <div id="login">
+          <h1>Log into Spotify first</h1>
+          <a href="/spotlogin" class="btn btn-primary">Log in with Spotify</a>
+        </div>
+        <div id="loggedin">
+          <div id="user-profile">
+          </div>
+          <div id="oauth">
+          </div>
+          <button class="btn btn-default" id="obtain-new-token">Obtain new token using the refresh token</button>
+        </div>
+      </div>
+
+      <script id="user-profile-template" type="text/x-handlebars-template">
+        <h1>Logged in as {{display_name}}</h1>
+        <div class="media">
+          <div class="pull-left">
+            <img class="media-object" width="150" src="{{images.0.url}}" />
+          </div>
+          <div class="media-body">
+            <dl class="dl-horizontal">
+              <dt>Display name</dt><dd class="clearfix">{{display_name}}</dd>
+              <dt>Id</dt><dd>{{id}}</dd>
+              <dt>Email</dt><dd>{{email}}</dd>
+              <dt>Spotify URI</dt><dd><a href="{{external_urls.spotify}}">{{external_urls.spotify}}</a></dd>
+              <dt>Link</dt><dd><a href="{{href}}">{{href}}</a></dd>
+              <dt>Profile Image</dt><dd class="clearfix"><a href="{{images.0.url}}">{{images.0.url}}</a></dd>
+              <dt>Country</dt><dd>{{country}}</dd>
+            </dl>
+          </div>
+        </div>
+      </script>
+
+      <script id="oauth-template" type="text/x-handlebars-template">
+        <h2>oAuth info</h2>
+        <dl class="dl-horizontal">
+          <dt>Access token</dt><dd class="text-overflow">{{access_token}}</dd>
+          <dt>Refresh token</dt><dd class="text-overflow">{{refresh_token}}</dd>
+        </dl>
+      </script>
+
+      <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.1/handlebars.min.js"></script>
+      <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+      <script>
+        (function() {
+
+          /**
+           * Obtains parameters from the hash of the URL
+           * @return Object
+           */
+          function getHashParams() {
+            var hashParams = {};
+            var e, r = /([^&;=]+)=?([^&;]*)/g,
+                q = window.location.hash.substring(1);
+            while ( e = r.exec(q)) {
+              hashParams[e[1]] = decodeURIComponent(e[2]);
+            }
+            return hashParams;
+          }
+
+          var userProfileSource = document.getElementById('user-profile-template').innerHTML,
+              userProfileTemplate = Handlebars.compile(userProfileSource),
+              userProfilePlaceholder = document.getElementById('user-profile');
+
+          var oauthSource = document.getElementById('oauth-template').innerHTML,
+              oauthTemplate = Handlebars.compile(oauthSource),
+              oauthPlaceholder = document.getElementById('oauth');
+
+          var params = getHashParams();
+
+          var access_token = params.access_token,
+              refresh_token = params.refresh_token,
+              error = params.error;
+
+          if (error) {
+            alert('There was an error during the authentication');
+          } else {
+            if (access_token) {
+              // render oauth info
+              oauthPlaceholder.innerHTML = oauthTemplate({
+                access_token: access_token,
+                refresh_token: refresh_token
+              });
+
+              $.ajax({
+                  url: 'https://api.spotify.com/v1/me',
+                  headers: {
+                    'Authorization': 'Bearer ' + access_token
+                  },
+                  success: function(response) {
+                    userProfilePlaceholder.innerHTML = userProfileTemplate(response);
+
+                    $('#login').hide();
+                    $('#loggedin').show();
+                  }
+              });
+            } else {
+                // render initial screen
+                $('#login').show();
+                $('#loggedin').hide();
+            }
+
+            document.getElementById('obtain-new-token').addEventListener('click', function() {
+              $.ajax({
+                url: '/refresh_token',
+                data: {
+                  'refresh_token': refresh_token
+                }
+              }).done(function(data) {
+                access_token = data.access_token;
+                oauthPlaceholder.innerHTML = oauthTemplate({
+                  access_token: access_token,
+                  refresh_token: refresh_token
+                });
+              });
+            }, false);
+          }
+        })();
+      </script>
+        <script id="user-profile-template" type="text/x-handlebars-template">
+          <h1>Logged in as {{display_name}}</h1>
+          <div class="media">
+            <div class="pull-left">
+              <img class="media-object" width="150" src="{{images.0.url}}" />
+            </div>
+            <div class="media-body">
+              <dl class="dl-horizontal">
+                <dt>Display name</dt><dd class="clearfix">{{display_name}}</dd>
+                <dt>Id</dt><dd>{{id}}</dd>
+                <dt>Email</dt><dd>{{email}}</dd>
+                <dt>Spotify URI</dt><dd><a href="{{external_urls.spotify}}">{{external_urls.spotify}}</a></dd>
+                <dt>Link</dt><dd><a href="{{href}}">{{href}}</a></dd>
+                <dt>Profile Image</dt><dd class="clearfix"><a href="{{images.0.url}}">{{images.0.url}}</a></dd>
+                <dt>Country</dt><dd>{{country}}</dd>
+              </dl>
+            </div>
+          </div>
+        </script>
+    
+        <script id="oauth-template" type="text/x-handlebars-template">
+          <h2>oAuth info</h2>
+          <dl class="dl-horizontal">
+            <dt>Access token</dt><dd class="text-overflow">{{access_token}}</dd>
+            <dt>Refresh token</dt><dd class="text-overflow">{{refresh_token}}</dd>
+          </dl>
+        </script>
+    
+        <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.1/handlebars.min.js"></script>
+        <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+        <script>
+          (function() {
+    
+            /**
+             * Obtains parameters from the hash of the URL
+             * @return Object
+             */
+            function getHashParams() {
+              var hashParams = {};
+              var e, r = /([^&;=]+)=?([^&;]*)/g,
+                  q = window.location.hash.substring(1);
+              while ( e = r.exec(q)) {
+                hashParams[e[1]] = decodeURIComponent(e[2]);
+              }
+              return hashParams;
+            }
+    
+            var userProfileSource = document.getElementById('user-profile-template').innerHTML,
+                userProfileTemplate = Handlebars.compile(userProfileSource),
+                userProfilePlaceholder = document.getElementById('user-profile');
+    
+            var oauthSource = document.getElementById('oauth-template').innerHTML,
+                oauthTemplate = Handlebars.compile(oauthSource),
+                oauthPlaceholder = document.getElementById('oauth');
+    
+            var params = getHashParams();
+    
+            var access_token = params.access_token,
+                refresh_token = params.refresh_token,
+                error = params.error;
+    
+            if (error) {
+              alert('There was an error during the authentication');
+            } else {
+              if (access_token) {
+                // render oauth info
+                oauthPlaceholder.innerHTML = oauthTemplate({
+                  access_token: access_token,
+                  refresh_token: refresh_token
+                });
+    
+                $.ajax({
+                    url: 'https://api.spotify.com/v1/me',
+                    headers: {
+                      'Authorization': 'Bearer ' + access_token
+                    },
+                    success: function(response) {
+                      userProfilePlaceholder.innerHTML = userProfileTemplate(response);
+    
+                      $('#login').hide();
+                      $('#loggedin').show();
+                    }
+                });
+              } else {
+                  // render initial screen
+                  $('#login').show();
+                  $('#loggedin').hide();
+              }
+    
+              document.getElementById('obtain-new-token').addEventListener('click', function() {
+                $.ajax({
+                  url: '/refresh_token',
+                  data: {
+                    'refresh_token': refresh_token
+                  }
+                }).done(function(data) {
+                  access_token = data.access_token;
+                  oauthPlaceholder.innerHTML = oauthTemplate({
+                    access_token: access_token,
+                    refresh_token: refresh_token
+                  });
+                });
+              }, false);
+            }
+          })();
+        </script>
+  <%} else {%>
+    <h1>Welcome, <%=body.display_name%>!</h1>
+    <button type="button" class="collapsible">My playlists</button>
+    <div class="content">
+      <table>
+        <colgroup>
+          <col span="3" width="390">
+        </colgroup>
+        <tr>
+          <th>Name</th>
+          <th></th>
+          <th>Local Queue?</th>
+        </tr>
+        <%const pids = playlists.map(p => String(p.id));%>
+        <%const qids = queues.map(q => String(q.playlist_id));%>
+        <%playlists.forEach(p => {%>
+          <tr>
+            <td><%=p.name%></td>
+            <!-- <td><%-JSON.stringify(p)%></td> -->
+            <%if (p.images && p.images[0]) {%>
+              <td><container>
+                <img src='<%=p.images[0].url%>' alt='no image available' width="50" height="50">
+                </container>
+              </td>
+            <%} else {%>
+              <td>No Image Available</td>
+            <%}%>
+            <%if (qids.includes(p.id)) {%>
+              <td><a href="/queue/<%=p.id%>">Yee</a></td>
+            <%} else {%> <td>Nah</td><%}%>
+          </tr>
+        <%});%>
+      </table>
+    </div>
+    <%if (many_playlists) {%>
+      <p>Warning: you have a lot of playlists. Only the first 50 we found are guaranteed to be shown in this list.</p>
+    <%}%>
+    <fieldset>
+      <form action="/logout" method="get">
+        <input type="submit" class="ghost-button" value="Log out">
+      </form>
+    </fieldset>
+    <fieldset>
+      <form action="/addQueue" method="GET">
+        <input type="submit" class="ghost-button" value="Add a Queue">
+      </form>
+    </fieldset>
+    <script>
+      var coll = document.getElementsByClassName("collapsible");
+      var i;
+      
+      for (i = 0; i < coll.length; i++) {
+        coll[i].addEventListener("click", function() {
+          this.classList.toggle("active");
+          var content = this.nextElementSibling;
+          if (content.style.display === "block") {
+            content.style.display = "none";
+          } else {
+            content.style.display = "block";
+          }
+        });
+      }
+    </script>
+  <%}%>
+  </body>
+</html>

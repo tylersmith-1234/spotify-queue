@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head><form action="/" method="GET"><input type="submit" class="button" value="Home"></form>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+.dropbtn {
+  background-color: #4CAF50;
+  color: white;
+  padding: 16px;
+  font-size: 16px;
+  border: none;
+}
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f1f1f1;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+.dropdown-content a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdown-content a:hover {background-color: #ddd;}
+
+.dropdown:hover .dropdown-content {display: block;}
+
+.dropdown:hover .dropbtn {background-color: #3e8e41;}
+</style>
+</head>
+<body>
+
+<h2>Hoverable Dropdown</h2>
+<p>Move the mouse over the button to open the dropdown menu.</p>
+
+
+
+  <form action="/addSong" method="POST" onsubmit="return submitForm();">
+    <div style="display: none;">
+      <table id="songs" name="songs"><tr><th>Songs to add</th></tr>
+      <%Object.keys(terms).forEach(t => {%>
+        <tr><td><input id="<%=terms[t]%>" name="<%=terms[t]%>"></td></tr>
+      <%});%>
+      </table>
+    </div>
+    
+    <select id="main" name="main" onchange="leaveChange()">
+      <option value="nul"></option>
+      <option value="playlists">My Playlists</option>
+      <option value="queues">My Queues</option>
+    </select>
+    <select id="choose" name="choose"></select>
+    <input type="submit" value="Add Song">
+  </form>
+
+  <script>
+    function submitForm() {
+      if (document.getElementById("main").value === 'nul' ||
+          document.getElementById("choose").value === 'nul') {
+        alert("Please select a value");
+        return false;
+      }
+      alert(`added songs with IDs ${Object.keys(terms)}`);
+      return true;
+    }
+    function leaveChange() {
+      if (document.getElementById("main").value == "playlists") {
+        removeAllElements(document.getElementById("choose"));
+        const dropdown = document.getElementById("choose");
+        let c;
+        const ps = <%-JSON.stringify(playlists.map(p => p.name))%>;
+        const ids = <%-JSON.stringify(playlists.map(p => p.id))%>;
+        const init = document.createElement("option");
+        init.text = '';
+        init.value = 'nul';
+        dropdown.options.add(init, 1);
+        ps.forEach((p, idx) => {
+          var c = document.createElement("option");
+          c.text = p;
+          c.value = ids[idx];
+          dropdown.options.add(c, 1);
+        });
+
+      } else if (document.getElementById("main").value == "queues") {
+        removeAllElements(document.getElementById("choose"));
+        const dropdown = document.getElementById("choose");
+        const ps = <%-JSON.stringify(queues.map(p => p.name))%>;
+        const ids = <%-JSON.stringify(queues.map(p => p.playlist_id))%>;
+        const init = document.createElement("option");
+        init.text = '';
+        init.value = 'nul';
+        dropdown.options.add(init, 1);
+        ps.forEach((p, idx) => {
+          var c = document.createElement("option");
+          c.text = p;
+          c.value = ids[idx];
+          dropdown.options.add(c, 1);
+        });
+      }
+    }
+    function removeAllElements(selectElement) {
+      var i, L = selectElement.options.length - 1;
+      for(i = L; i >= 0; i--) {
+          selectElement.remove(i);
+      }
+    }
+  </script>
+</div>

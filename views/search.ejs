@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Test</title>
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:300' rel='stylesheet' type='text/css'>
+  </head>
+  <body>
+    <style type="text/css">
+      .centerImage
+      {
+       text-align:center;
+       display:block;
+      }
+    </style>
+    <form action="/" method="GET"><input type="submit" class="button" value="Home"></form>
+    <div class="container">
+      <fieldset>
+        <form action="/Search" method="post">
+          <input name="term" type="text" class="ghost-input" placeholder="<%=term%>" required>
+          <input type="submit" class="ghost-button" value="Search Songs">
+        </form>
+      </fieldset>
+      <fieldset>
+        <form action="/addToPlaylist" method="POST">
+          <table>
+            <colgroup>
+              <col span="3" width="390">
+            </colgroup>
+            <tr>
+              <th></th>
+              <th>Title</th>
+              <th>Primary Artist</th>
+              <th>Album</th>
+            </tr>
+          <%songs.forEach(s => {%>
+            <tr>
+              <td><input type="checkbox" id="<%=s.name%>+<%=s.album.name%>" name="<%=s.name%>" value="<%=s.id%>"></td>
+              <td><label for="<%=s.name%>+<%=s.album.name%>"><%=s.name%></label></td>
+              <td><%=s.artists[0] ? s.artists[0].name : 'Unavailable'%></td>
+              <td><container>
+                  <img src='<%=s.album.images[0].url%>' alt='Image unavailable' width="50" height="50">
+                  <figcaption><%=s.album.name%></figcaption>
+              </container></td>
+            </tr><!-- <tr>
+              <td style="text-align:center"><a href="<%=s.href%>" target="_blank"><%=s.name%></a></td>
+              <td style="text-align:center"><%=s.artists[0].name%></td>
+              <td style="text-align:center">
+                  
+              </td>
+            </tr> -->
+          <%});%>
+          </table>
+          <input type="submit" class="ghost-button" value="Add Selected to Playlist">
+        </form>
+      </fieldset>
+    </div>
+  </body>
+</html>

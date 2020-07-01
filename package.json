@@ -1,0 +1,18 @@
+{
+  "author": "Spotify",
+  "name": "web-api-auth-examples",
+  "description": "Basic examples of the Spotify authorization flows through OAuth 2",
+  "version": "0.0.2",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "cookie-parser": "^1.4.5",
+    "cors": "^2.8.4",
+    "cryptiles": "^4.1.2",
+    "ejs": "^3.1.2",
+    "express": "^4.16.4",
+    "moment": "^2.26.0",
+    "mongodb": "^3.5.8",
+    "querystring": "~0.2.0",
+    "request": "~2.83.0"
+  }
+}

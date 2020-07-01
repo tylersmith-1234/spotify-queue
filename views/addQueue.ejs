@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+  <form action="/" method="GET"><input type="submit" class="button" value="Home"></form>
+  <form action="/makeQueue" method="POST">
+    <h3>From my Playlists</h3>
+    <select name="playlist_id">
+      <%playlists.forEach(p => {%>
+        <option value="<%=p.id%>"><%=p.name%></option>
+      <%});%>
+    </select>
+    <input type="submit" value="Submit">
+  </form>
+  <form action="/findQueue" method="POST">
+    <h3>Find by ID</h3>
+    <input type="text" name="id" value="">
+    <input type="submit" value="Submit">
+  </form>
+</body>
+</html>

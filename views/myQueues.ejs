@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Test</title>
+    <style>
+      /* Style the button that is used to open and close the collapsible content */
+    .collapsible {
+      background-color: #eee;
+      color: #444;
+      cursor: pointer;
+      padding: 18px;
+      width: 100%;
+      border: none;
+      text-align: left;
+      outline: none;
+      font-size: 15px;
+    }
+    
+    /* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
+    .active, .collapsible:hover {
+      background-color: #ccc;
+    }
+    
+    /* Style the collapsible content. Note: hidden by default */
+    .content {
+      padding: 0 18px;
+      display: none;
+      overflow: hidden;
+      background-color: #f1f1f1;
+      transition: max-height 0.2s ease-out;
+    }
+    .collapsible:after {
+      content: '\02795'; /* Unicode character for "plus" sign (+) */
+      font-size: 13px;
+      color: white;
+      float: right;
+      margin-left: 5px;
+    }
+
+    .active:after {
+      content: "\2796"; /* Unicode character for "minus" sign (-) */
+    }
+    </style>
+    <form action="/" method="GET"><input type="submit" class="button" value="Home"></form>
+    <link rel="stylesheet" type="text/css" href="/css/table-responsive.css">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:300' rel='stylesheet' type='text/css'>
+    <style type="text/css">
+      #login, #loggedin {
+        display: none;
+      }
+      .text-overflow {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        width: 500px;
+      }
+    </style>
+    <style>
+    /* Style the button that is used to open and close the collapsible content */
+      .collapsible {
+        background-color: #eee;
+        color: #444;
+        cursor: pointer;
+        padding: 18px;
+        width: 100%;
+        border: none;
+        text-align: left;
+        outline: none;
+        font-size: 15px;
+      }
+      
+      /* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
+      .active, .collapsible:hover {
+        background-color: #ccc;
+      }
+      
+      /* Style the collapsible content. Note: hidden by default */
+      .content {
+        padding: 0 18px;
+        display: none;
+        overflow: hidden;
+        background-color: #f1f1f1;
+        transition: max-height 0.2s ease-out;
+      }
+      .collapsible:after {
+        content: '\02795'; /* Unicode character for "plus" sign (+) */
+        font-size: 13px;
+        color: white;
+        float: right;
+        margin-left: 5px;
+      }
+
+      .active:after {
+        content: "\2796"; /* Unicode character for "minus" sign (-) */
+      }
+      </style>
+  </head>
+  <body>
+    <style>
+      DIV.table 
+      {
+        display:table;
+      }
+      FORM.tr, DIV.tr
+      {
+        display:table-row;
+      }
+      SPAN.td
+      {
+        display:table-cell;
+      }
+    </style>
+    <select id="which" onchange="getQueues()">
+      <option value="nul"></option>
+      <option value="mine">My Queues</option>
+      <option value="following">Following</option>
+    </select>
+    <div id="mine" style="display: none;"><form action="/approveSongs" method="POST" name="send" id="send">
+      <select id="choose" name="choose" onchange="getSongs()">
+        <option value="nul"></option>
+        <%queues.forEach(q => {%>
+          <option value="<%=q.playlist_id%>"><%=q.name%></option>
+        <%});%>
+      </select>
+      <table id="main">
+        <tr>
+          <th style="width:100px"></th>
+          <th style="width:100px">Song</th>
+          <th style="width:100px">Artist</th>
+        </tr>
+      </table>
+      <input type="submit" name="approve" value="Approve Selected Songs" class="ghost-button">
+      <input type="submit" name="reject" value="Reject Selected Songs" class="ghost-button">
+    </form></div>
+    <div id="following" style="display: none;">
+      <select id="fchoose" name="fchoose" onchange="fgetSongs()">
+        <option value="nul"></option>
+        <%following.forEach(q => {%>
+          <option value="<%=q.playlist_id%>"><%=q.name%></option>
+        <%});%>
+      </select>
+      <table id="fmain">
+        <tr>
+          <th style="width:100px">Song</th>
+          <th style="width:100px">Artist</th>
+        </tr>
+      </table>
+    </div>
+    <script>
+      function conf(q, s) {
+        const str = `You are about to submit songs ${s} to playlist ${q}. Is this right?`;
+        confirm(str);
+      }
+      function getQueues() {
+        const curstatus = document.getElementById('which').value;
+        document.getElementById('mine').style.display = 'none';
+        document.getElementById('following').style.display = 'none';
+        if (curstatus !== 'nul') document.getElementById(curstatus).style.display = null;
+      }
+      function fgetSongs() {
+        const curlist = document.getElementById('fchoose').value;
+        const table = document.getElementById('fmain');
+        if (table.getElementsByTagName("tbody")[0]) {
+          table.getElementsByTagName("tbody")[0].innerHTML = table.rows[0].innerHTML;
+        }
+        if (curlist !== 'nul') {
+          const songs = <%-JSON.stringify(following)%>.filter(q => q.playlist_id === curlist)[0].songs;
+          songs.forEach(s => {
+            var row = table.insertRow(-1);
+            var cell1 = row.insertCell(0);
+            var cell2 = row.insertCell(1);
+            cell1.innerHTML = s.name;
+            cell2.innerHTML = s.artists[0];
+          });
+        }
+      }
+      function getSongs() {
+        const curlist = document.getElementById('choose').value;
+        const table = document.getElementById('main');
+        if (table.getElementsByTagName("tbody")[0]) {
+          table.getElementsByTagName("tbody")[0].innerHTML = table.rows[0].innerHTML;
+        }
+        if (curlist !== 'nul') {
+          const songs = <%-JSON.stringify(queues)%>.filter(q => q.playlist_id === curlist)[0].songs;
+          songs.forEach(s => {
+            var row = table.insertRow(-1);
+            var cell1 = row.insertCell(0);
+            var cell2 = row.insertCell(1);
+            var cell3 = row.insertCell(2);
+            cell1.innerHTML = `<input type="checkbox" id="${s.song_id}" name="${s.song_id}" value="${s.name}">`;
+            cell2.innerHTML = s.artists[0];
+            cell3.innerHTML = `<label for="${s.song_id}">${s.name}</label>`;
+          });
+        }
+      }
+
+      var coll = document.getElementsByClassName("collapsible");
+      var i;
+    
+      for (i = 0; i < coll.length; i++) {
+        coll[i].addEventListener("click", function() {
+          this.classList.toggle("active");
+          var content = this.nextElementSibling;
+          if (content.style.display === "block") {
+            content.style.display = "none";
+          } else {
+            content.style.display = "block";
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

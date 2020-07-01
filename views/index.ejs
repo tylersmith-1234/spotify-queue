@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Test</title>
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:300' rel='stylesheet' type='text/css'>
+  </head>
+  <body>
+    <div class="container">
+      <fieldset>
+        <form action="/Search" method="post">
+          <input name="term" type="text" class="ghost-input" placeholder="Enter a Song Title" required>
+          <input type="submit" class="ghost-button" value="Search Songs">
+        </form>
+      </fieldset>
+    </div>
+  <div class="container">
+    <div id="login">
+      <fieldset>
+        <form action="/profile" method="get">
+          <input type="submit" class="ghost-button" value="go to profile">
+        </form>
+      </fieldset>
+    </div>
+    <form action="/myQueues" method="get">
+      <input type="submit" class="ghost-button" value="My Queues">
+    </form>
+    <form action="/addQueue" method="GET">
+      <input type="submit" class="ghost-button" value="Add a Queue">
+    </form>
+  </div>
+  <div id="about">
+    <h1>About This App</h1>
+    <p>This is a system designed to let people request songs for your social functions!</p>
+    <p>Instead of having to take requests manually, they can go here and request anything they want!</p>
+    <p>This system uses the Spotify authentication system which is required for all functions.</p>
+  </div>
+  </body>
+</html>
