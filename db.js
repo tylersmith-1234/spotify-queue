@@ -1,5 +1,5 @@
 const mongoClient = require('mongodb').MongoClient;
-const mongoDbUrl = 'mongodb://127.0.0.1:27017';
+const mongoDbUrl = 'mongodb+srv://tyler:bus402@spotify-queue.1i1l0.mongodb.net?retryWrites=true&w=majority';
 let mongodb;
 
 function connect(callback){
