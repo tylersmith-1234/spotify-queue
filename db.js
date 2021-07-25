@@ -4,7 +4,6 @@ const path = require('path')
 const creds = fs.existsSync(path.join(__dirname, './credentials.json')) ? './credentials.json' : './guestCredentials.json';
 const { username, password } = require(`${creds}`);
 const mongoDbUrl = `mongodb+srv://${username}:${password}@spotify-queue.1i1l0.mongodb.net?retryWrites=true&w=majority`;
-console.log(mongoDbUrl);
 let mongodb;
 
 function connect(callback){
