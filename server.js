@@ -42,8 +42,8 @@ db.connect(() => {
 });
 
 app.get('/', function (req, res) {
-  const host = req.get('host');
-  redirect_uri = `http${host.split(':')[0] !== 'localhost' ? 's' : ''}://${host}/callback`;
+  const host = req.get('host');//${host.split(':')[0] !== 'localhost' ? 's' : ''}
+  redirect_uri = `http://${host}/callback`;
   res.render('index');
 });
 app.get('/profile', function(req, res) {
