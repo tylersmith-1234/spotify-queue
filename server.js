@@ -9,7 +9,7 @@ const moment = require('moment');
 
 const client_id = '8b1d748261f44f9d8355f33950df5081';
 const client_secret = 'a83c847788fd4980ab62ddf0ae35c8f9';
-const redirect_uri = 'http://localhost:8888/callback'; // Your redirect uri
+let redirect_uri = 'http://localhost:8888/callback'; // Your redirect uri
 let access_token = '';
 let refresh_token = '';
 const app = express();
@@ -30,8 +30,9 @@ var generateRandomString = function(length) {
 };
 
 db.connect(() => {
-  app.listen(8888, () => {
-    console.log('listening on 8888');
+  const port = (process && process.env && process.env.PORT) ? process.env.PORT : 8888;
+  app.listen(port, () => {
+    console.log(`listening on ${port}`);
     db.get('spotify').listCollections({name: 'queues'}).next((err, names) => {
       if (err) {
         db.get('spotify').createCollection('queues');
@@ -41,6 +42,8 @@ db.connect(() => {
 });
 
 app.get('/', function (req, res) {
+  const host = req.get('host');
+  redirect_uri = `http${host.split(':')[0] !== 'localhost' ? 's' : ''}://${host}/callback`;
   res.render('index');
 });
 app.get('/profile', function(req, res) {
