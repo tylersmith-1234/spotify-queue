@@ -43,9 +43,7 @@ db.connect(() => {
 
 app.get('/', function (req, res) {
   const host = req.get('host');
-  console.log(host);
   redirect_uri = `http${host.split(':')[0] !== 'localhost' ? 's' : ''}://${host}/callback`;
-  console.log(redirect_uri);
   res.render('index');
 });
 app.get('/profile', function(req, res) {
@@ -139,7 +137,7 @@ app.get('/spotlogin', function(req, res) {
   res.cookie(stateKey, state);
 
   // your application requests authorization
-  var scope = 'user-read-private user-read-email playlist-read-private playlist-modify-public playlist-modify-private';
+  var scope = 'user-read-private user-read-email playlist-read-private playlist-modify-public playlist-modify-private playlist-read-collaborative';
   res.redirect('https://accounts.spotify.com/authorize?' +
     querystring.stringify({
       response_type: 'code',
@@ -320,11 +318,14 @@ app.post('/approveSongs', (req, res) => {
   });
 });
 app.post('/findQueue', (req, res) => {
-  const playlist_id = req.body.id;
+  const inp = req.body.id;
+  const playlist_id = inp.includes('/') ? inp.split('/').pop().split('?')[0] : inp;
   reAuthorize((err, body) => {
     const usr = body.id;
     db.get('spotify').collection('queues').findOne({playlist_id: playlist_id}).then((obj) => {
-      if (obj.owner === usr) {
+      if (!obj) {
+        console.log('A queue for this playlist has not been made yet! Please ask the owner to do so.');
+      } else if (obj.owner === usr) {
         console.log('You cannot follow a playlist you own');
       } else {
         db.get('spotify').collection('queues').updateOne({_id: obj._id}, 
@@ -352,6 +353,7 @@ function reAuthorize(callback) {
         return callback(err);
       }
       body = JSON.parse(body);
+      app.locals.current_user = body;
       body.new_access = new_access;
       return callback(null, body);
     });

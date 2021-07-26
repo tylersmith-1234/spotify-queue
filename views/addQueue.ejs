@@ -8,14 +8,17 @@
   <form action="/makeQueue" method="POST">
     <h3>From my Playlists</h3>
     <select name="playlist_id">
-      <%playlists.forEach(p => {%>
+      <%playlists.filter(p => p.owner && p.owner.id === current_user.id).forEach(p => {%>
         <option value="<%=p.id%>"><%=p.name%></option>
       <%});%>
     </select>
     <input type="submit" value="Submit">
   </form>
   <form action="/findQueue" method="POST">
-    <h3>Find by ID</h3>
+    <div>
+      <h3>Find by playlist ID/url</h3>
+      <p>To find a playlist's URL, go to the playlist in Spotify, click the 3 dots, go to "share" and click "copy link"/"copy link to playlist".</p>
+    </div>
     <input type="text" name="id" value="">
     <input type="submit" value="Submit">
   </form>
